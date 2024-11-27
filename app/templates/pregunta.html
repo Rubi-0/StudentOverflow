@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacer una Pregunta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ccff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #d1b3ff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            color: #4b0082;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #6a0dad;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #800080;
+            background-color: #f2e6ff;
+        }
+
+        button {
+            padding: 10px;
+            color: #ffffff;
+            background-color: #6a0dad;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4b0082;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="form-title">Hacer una Pregunta</h1>
+        <!-- Formulario para hacer una pregunta -->
+        <form id="preguntaForm" action="/preguntar" method="post">
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" name="titulo" required>
+
+            <label for="contenido">Contenido:</label>
+            <textarea id="contenido" name="contenido" rows="5" required></textarea>
+
+            <button type="submit">Enviar Pregunta</button>
+        </form>
+    </div>
+
+    <script>
+        // Escuchar el evento de envío del formulario para agregar el token en el header
+        document.getElementById('preguntaForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Evitar que el formulario se envíe de la forma predeterminada
+
+            // Obtener los valores del formulario
+            const titulo = document.getElementById('titulo').value;
+            const contenido = document.getElementById('contenido').value;
+
+            // Obtener el token del localStorage
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                alert('No estás autenticado. Por favor, inicia sesión.');
+                window.location.href = '/login'; // Redirigir al usuario al login si no tiene un token
+                return;
+            }
+
+            try {
+                // Enviar la solicitud POST al servidor con los datos de la pregunta
+                const response = await fetch('/preguntar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: new URLSearchParams({
+                        titulo: titulo,
+                        contenido: contenido
+                    })
+                });
+
+                if (response.ok) {
+                    // Si la respuesta es exitosa, muestra un mensaje y redirige a la página principal
+                    alert('Pregunta enviada exitosamente.');
+                    window.location.href = '/'; // Redirigir al usuario a la página de inicio
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                alert('Ocurrió un error en el servidor.');
+            }
+        });
+    </script>
+</body>
+
+</html>
+

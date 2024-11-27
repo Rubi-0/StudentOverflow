@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ccff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #d1b3ff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            color: #4b0082;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #6a0dad;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #800080;
+            background-color: #f2e6ff;
+        }
+
+        button {
+            padding: 10px;
+            color: #ffffff;
+            background-color: #6a0dad;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4b0082;
+        }
+
+        .register-link {
+            text-align: center;
+            color: #6a0dad;
+        }
+
+        .register-link a {
+            color: #4b0082;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="form-title">Iniciar Sesión</h1>
+        <form id="loginForm">
+            <label for="correo">Correo:</label>
+            <input type="email" id="correo" name="correo" required>
+
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Iniciar sesión</button>
+        </form>
+        <p class="register-link">No tienes cuenta? <a href="/registro">Regístrate</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Evita el envío del formulario por defecto
+
+            // Capturar los datos del formulario
+            const correo = document.getElementById('correo').value;
+            const password = document.getElementById('password').value;
+
+            // Crear los parámetros en formato x-www-form-urlencoded
+            const params = new URLSearchParams();
+            params.append('correo', correo);
+            params.append('password', password);
+
+            try {
+                // Enviar la solicitud POST al servidor en formato x-www-form-urlencoded
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString() // Convertir los parámetros a una cadena
+                });
+
+                // Verificar si la respuesta es exitosa
+                if (response.ok) {
+                    const data = await response.json();
+                    // Guardar el token en localStorage
+                    console.log(data);
+                    localStorage.setItem('access_token', data.Token);
+                    alert('Login exitoso');
+                    // Redirigir a otra página o cargar contenido protegido
+                    window.location.href = "/";
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.msg}`);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                alert('Ocurrió un error en el servidor.');
+            }
+        });
+    </script>
+</body>
+
+</html>
