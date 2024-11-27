@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Básica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ccff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            color: #ffffff;
+            background-color: #6a0dad;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #4b0082;
+        }
+
+        #logoutLink {
+            background-color: #800080;
+        }
+
+        #logoutLink:hover {
+            background-color: #4b0082;
+        }
+
+        .questions-section {
+            margin-top: 40px;
+        }
+
+        .question {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .answer-box {
+            margin-top: 10px;
+        }
+
+        .answer-box textarea {
+            width: 100%;
+            height: 60px;
+            border-radius: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .answer-box button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            color: #ffffff;
+            background-color: #6a0dad;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .answer-box button:hover {
+            background-color: #4b0082;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="buttons">
+            <a href="#" id="preguntarLink" class="button">Hacer una pregunta</a>
+            <a href="#" id="rutaRestringida" class="button">Ruta restringida</a>
+            <a href="/login" class="button">Inicio de sesión</a>
+            <a href="/registro" id="registroLink" class="button">Registrarse</a>
+            <a href="/logout" id="logoutLink" class="button">Cerrar sesión</a>
+        </div>
+
+        <div class="questions-section">
+            <div class="question">
+                <div class="question-title">¿Cuál es el significado de la vida?</div>
+                <p>Esta es una pregunta que ha sido discutida por filósofos durante siglos. ¿Qué piensas tú?</p>
+                <div class="answer-box">
+                    <textarea placeholder="Escribe tu respuesta..."></textarea>
+                    <button>Responder</button>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-title">¿Cuál es tu lenguaje de programación favorito y por qué?</div>
+                <p>Comparte tus opiniones sobre los lenguajes de programación que más te gustan.</p>
+                <div class="answer-box">
+                    <textarea placeholder="Escribe tu respuesta..."></textarea>
+                    <button>Responder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('preguntarLink').addEventListener('click', async function (event) {
+            event.preventDefault(); // Evitar la navegación predeterminada
+
+            // Obtener el token del localStorage
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                alert('No estás autenticado. Por favor, inicia sesión.');
+                window.location.href = '/login'; // Redirigir a la página de login si no hay token
+                return;
+            }
+
+            try {
+                // Enviar la solicitud GET a la ruta /preguntar con el token en el header
+                const response = await fetch('/preguntar', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    // Si la respuesta es exitosa, renderizar el contenido
+                    const data = await response.text();
+                    document.body.innerHTML = data; // Mostrar la página de hacer una pregunta en el cuerpo
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.Mensaje}`);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                alert('Ocurrió un error en el servidor.');
+            }
+        });
+
+        document.getElementById('logoutLink').addEventListener('click', function (event) {
+            event.preventDefault(); // Evitar la navegación predeterminada
+
+            // Eliminar el token del localStorage
+            localStorage.removeItem('access_token');
+
+            // Redirigir al usuario a la página de logout (que también renderiza login.html)
+            window.location.href = '/logout';
+        });
+
+        document.getElementById('rutaRestringida').addEventListener('click', async function (event) {
+            event.preventDefault(); // Evitar la navegación predeterminada
+
+            // Obtener el token del localStorage
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                alert('No estás autenticado. Por favor, inicia sesión.');
+                window.location.href = '/login'; // Redirigir a la página de login si no hay token
+                return;
+            }
+
+            try {
+                // Enviar la solicitud GET a la ruta restringida con el token en el header
+                const response = await fetch('/restringido', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    // Si la respuesta es exitosa, renderizar el contenido
+                    const data = await response.text();
+                    document.body.innerHTML = data; // Mostrar la página restringida en el cuerpo
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                alert('Ocurrió un error en el servidor.');
+            }
+        });
+    </script>
+</body>
+
+</html>
