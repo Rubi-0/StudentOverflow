@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responder Pregunta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ccff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .question {
+            font-size: 20px;
+            font-weight: bold;
+            color: #6a0dad;
+            margin-bottom: 20px;
+        }
+
+        .answer-box {
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+
+        .submit-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            color: #ffffff;
+            background-color: #6a0dad;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-button:hover {
+            background-color: #4b0082;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>StudentOverflow</h1>
+        <div class="question">
+            ¿Cuál es tu lenguaje de programación favorito y por qué?
+        </div>
+
+        <div class="answer-box">
+            <!-- Formulario para enviar la respuesta -->
+            <form method="POST" action="/responder">
+                <textarea name="contenido" placeholder="Escribe tu respuesta aquí..."></textarea>
+                <button type="submit" class="submit-button">Enviar</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,7 +1,9 @@
 from .models.usuarios import User
+from .models.respuestas import Respuesta
+from .models.preguntas import Pregunta
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
-from .models.preguntas import Pregunta
+
 
 
 
@@ -48,3 +50,15 @@ def crear_pregunta(usuario_id, titulo, contenido):
         'contenido': contenido
     }, 201
 
+def crear_respuesta(usuario_id, pregunta_id, contenido):
+    nueva_respuesta = Respuesta(
+        contenido=contenido,
+        usuario_id=usuario_id,
+        pregunta_id=pregunta_id
+    )
+    nueva_respuesta.save()
+
+    return {
+        'status': 'Respuesta creada exitosamente',
+        'contenido': contenido
+    }, 201

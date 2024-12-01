@@ -1,9 +1,11 @@
 from flask_restful import Resource
-from flask import request, render_template, make_response
+from flask import request, render_template, make_response, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from .methods import user_register
 from .methods import user_login
 from .methods import crear_pregunta
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from .methods import crear_respuesta
+from .models.preguntas import Pregunta
 
 
 
@@ -59,6 +61,17 @@ class Logout(Resource):
         pagina = render_template('login.html')
         respuesta = make_response(pagina)
         return respuesta   
+    
+class ObtenerPreguntas(Resource):
+    def get(self):
+        # Consultar todas las preguntas almacenadas en la base de datos
+        preguntas = Pregunta.query.all()
+        lista_preguntas = [
+            {"id": pregunta.id, "titulo": pregunta.titulo, "contenido": pregunta.contenido}
+            for pregunta in preguntas
+        ]
+        return jsonify(lista_preguntas)
+
 class Preguntar(Resource):
     @jwt_required()
     def get(self):
@@ -74,10 +87,23 @@ class Preguntar(Resource):
         respuesta, status = crear_pregunta(user_id, titulo, contenido)
         return respuesta, status
     
+class Responder(Resource):
+    @jwt_required()
+    def get(self):
+        pagina = render_template('responder.html')
+        respuesta = make_response(pagina)
+        return respuesta
 
+    @jwt_required()
+    def post(self, pregunta_id):
+        user_id = get_jwt_identity()
+        contenido = request.form.get('contenido')
 
+        if not contenido:
+            return {"error": "El contenido es obligatorio"}, 400
 
-
+        respuesta, status = crear_respuesta(user_id, pregunta_id, contenido)
+        return jsonify(respuesta), status
 
 class APIRoutes:
     def init_api(self, api):
@@ -85,7 +111,10 @@ class APIRoutes:
         api.add_resource(Registro, '/registro')
         api.add_resource(login, '/login')
         api.add_resource(Restringido, '/restringido')
-        api.add_resource(Logout, '/logout')
         api.add_resource(Preguntar, '/preguntar')
+        api.add_resource(Logout, '/logout')
+        api.add_resource(ObtenerPreguntas, '/preguntas')
+        api.add_resource(Responder, '/responder')
+
 
 

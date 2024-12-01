@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Básica</title>
+    <title>StudentOverflow</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,26 +67,14 @@
             margin-bottom: 10px;
         }
 
-        .answer-box {
-            margin-top: 10px;
-        }
-
-        .answer-box textarea {
-            width: 100%;
-            height: 60px;
-            border-radius: 5px;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
         .answer-box button {
-            margin-top: 10px;
             padding: 8px 15px;
             color: #ffffff;
             background-color: #6a0dad;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
         .answer-box button:hover {
@@ -97,6 +85,7 @@
 
 <body>
     <div class="container">
+        <h1>StudentOverflow</h1>
         <div class="buttons">
             <a href="#" id="preguntarLink" class="button">Hacer una pregunta</a>
             <a href="#" id="rutaRestringida" class="button">Ruta restringida</a>
@@ -106,28 +95,91 @@
         </div>
 
         <div class="questions-section">
-            <div class="question">
-                <div class="question-title">¿Cuál es el significado de la vida?</div>
-                <p>Esta es una pregunta que ha sido discutida por filósofos durante siglos. ¿Qué piensas tú?</p>
-                <div class="answer-box">
-                    <textarea placeholder="Escribe tu respuesta..."></textarea>
-                    <button>Responder</button>
-                </div>
-            </div>
-
-            <div class="question">
-                <div class="question-title">¿Cuál es tu lenguaje de programación favorito y por qué?</div>
-                <p>Comparte tus opiniones sobre los lenguajes de programación que más te gustan.</p>
-                <div class="answer-box">
-                    <textarea placeholder="Escribe tu respuesta..."></textarea>
-                    <button>Responder</button>
-                </div>
-            </div>
+            <!-- Aquí se cargarán las preguntas dinámicamente -->
         </div>
     </div>
 
     <script>
-        document.getElementById('preguntarLink').addEventListener('click', async function (event) {
+        // Cargar las preguntas al cargar la página
+        document.addEventListener("DOMContentLoaded", async function () {
+            try {
+                const response = await fetch('/preguntas', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const preguntas = await response.json();
+                    const questionsSection = document.querySelector('.questions-section');
+
+                    preguntas.forEach(pregunta => {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.classList.add('question');
+
+                        const questionTitle = document.createElement('div');
+                        questionTitle.classList.add('question-title');
+                        questionTitle.textContent = pregunta.titulo;
+
+                        const questionContent = document.createElement('p');
+                        questionContent.textContent = pregunta.contenido;
+
+                        const answerBox = document.createElement('div');
+                        answerBox.classList.add('answer-box');
+
+                        const answerButton = document.createElement('button');
+                        answerButton.textContent = 'Responder';
+                        answerButton.onclick = async function () {
+                            // Obtener el token del localStorage
+                            const token = localStorage.getItem('access_token');
+
+                            if (!token) {
+                                alert('No estás autenticado. Por favor, inicia sesión.');
+                                window.location.href = '/login'; // Redirigir a la página de login si no hay token
+                                return;
+                            }
+
+                            try {
+                                // Enviar la solicitud GET a la ruta /responder con el token en el header
+                                const response = await fetch('/responder', {
+                                    method: 'GET',
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`
+                                    }
+                                });
+
+                                if (response.ok) {
+                                    // Si la respuesta es exitosa, renderizar el contenido
+                                    const data = await response.text();
+                                    document.body.innerHTML = data; // Mostrar la página de respuesta en el cuerpo
+                                } else {
+                                    const errorData = await response.json();
+                                    alert(`Error: ${errorData.Mensaje}`);
+                                }
+                            } catch (error) {
+                                console.error('Error en la solicitud:', error);
+                                alert('Ocurrió un error en el servidor.');
+                            }
+                        };
+
+                        answerBox.appendChild(answerButton);
+                        questionDiv.appendChild(questionTitle);
+                        questionDiv.appendChild(questionContent);
+                        questionDiv.appendChild(answerBox);
+
+                        questionsSection.appendChild(questionDiv);
+                    });
+                } else {
+                    alert('Error al cargar las preguntas.');
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                alert('Ocurrió un error en el servidor.');
+            }
+        });
+
+        document.getElementById('preguntarLink').addEventListener('click', async function(event) {
             event.preventDefault(); // Evitar la navegación predeterminada
 
             // Obtener el token del localStorage
@@ -162,7 +214,7 @@
             }
         });
 
-        document.getElementById('logoutLink').addEventListener('click', function (event) {
+        document.getElementById('logoutLink').addEventListener('click', function(event) {
             event.preventDefault(); // Evitar la navegación predeterminada
 
             // Eliminar el token del localStorage
@@ -172,7 +224,7 @@
             window.location.href = '/logout';
         });
 
-        document.getElementById('rutaRestringida').addEventListener('click', async function (event) {
+        document.getElementById('rutaRestringida').addEventListener('click', async function(event) {
             event.preventDefault(); // Evitar la navegación predeterminada
 
             // Obtener el token del localStorage
@@ -210,3 +262,4 @@
 </body>
 
 </html>
+
